@@ -42,6 +42,7 @@ pub fn session(name: &str, value: &str) -> String {
 mod tests {
     use std::collections::HashMap;
     use super::parse;
+    use crate::cookies::session;
 
     #[test]
     fn parse_success() {
@@ -75,14 +76,20 @@ mod tests {
             }
         ];
 
-        for test_case in test_cases.iter() {
+        for test_case in &test_cases {
             let res = parse(test_case.cookie.as_ref());
 
             assert_eq!(res.len(), test_case.expected.len(), "Test with '{}' failed", test_case.name);
             for (key, _) in res.iter() {
                 assert_eq!(res[key], test_case.expected[key], "Test with '{}' failed", test_case.name);
             }
-
         }
+    }
+
+    #[test]
+    fn session_success() {
+        assert_eq!(session("foo", ""), String::from("__Secure--foo=; Path=/; SameSite=Lax; Secure; HttpOnly"));
+        assert_eq!(session("foo", "bar"), String::from("__Secure--foo=bar; Path=/; SameSite=Lax; Secure; HttpOnly"));
+        assert_eq!(session("foonicode", "bar☠"), String::from("__Secure--foonicode=bar☠; Path=/; SameSite=Lax; Secure; HttpOnly"));
     }
 }
